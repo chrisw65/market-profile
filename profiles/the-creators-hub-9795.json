@@ -1,0 +1,125 @@
+{
+  "community": {
+    "slug": "the-creators-hub-9795",
+    "name": "The Creator's Hub",
+    "tagline": "\u201cA supportive space for late-bloomers to finally write & publish their book using simple AI tools & step-by-step guidance.\u201d",
+    "hero_statement": "A safe, supportive community for late-bloomers (40+) who want to finally start, and finish, their book using simple AI tools, structure, and encouragement.",
+    "color": "#E9597F",
+    "plan": "hobby",
+    "privacy": 1,
+    "members": 33,
+    "online_members": 3,
+    "posts": 29,
+    "courses": 10,
+    "modules": 23,
+    "created_at": "2025-10-12T20:16:12.848696Z",
+    "updated_at": "2025-12-12T23:22:29.997261Z"
+  },
+  "owner": {
+    "id": "a48465ff0ad7411e964816645053b926",
+    "name": "Wendy Williams",
+    "location": "UK",
+    "bio": "Hi there! I\u2019m a practical-minded entrepreneur passionate about helping authors to secure their manuscripts for online sharing. I'm also an author."
+  },
+  "value_stack": {
+    "promise": "A safe, supportive community for late-bloomers (40+) who want to finally start, and finish, their book using simple AI tools, structure, and encouragement.",
+    "experience": [
+      "Inside you\u2019ll find :",
+      "\ud83d\udcc5 Weekly Live Trainings: Learn how to clarify, plan, write and shape your book with simple guided steps.",
+      "\ud83d\udd25 The 5-Day \u201cStart & Shape Your Book\u201d Challenge (Dec 8\u201312)",
+      "You\u2019ll create your idea, title, promise, reader, chapter map & first page, with AI prompts and coaching.",
+      "\u270f\ufe0f Writing Prompts, Feedback & Wins Celebrate progress, get support, and stay motivated.",
+      "\ud83e\udd16 AI Tools for Non-Tech Authors: Simple, supportive AI walkthroughs for planning, writing and editing without overwhelm.",
+      "\ud83d\udc9b A Kind, Encouraging Community: Because you don\u2019t have to do this alone, or perfectly."
+    ],
+    "next_steps": [
+      "Comment below with your book idea (or ideas!)",
+      "Tell us what you hope to achieve before 2026",
+      "Join the weekly training on Tuesdays",
+      "Mark your calendar for the December challenge",
+      "You\u2019re not late.",
+      "You're right on time.",
+      "Let\u2019s write your book together."
+    ]
+  },
+  "keywords": [
+    "book",
+    "simple",
+    "supportive",
+    "write",
+    "tools",
+    "late-bloomers",
+    "finally",
+    "using",
+    "community",
+    "start",
+    "weekly",
+    "shape"
+  ],
+  "media": [
+    {
+      "id": "da0f5fd06e244726bffc98f301ee8516",
+      "url": "https://assets.skool.com/f/16edc7c176a04534b56cf27820fd982c/ac4c1294a0dc4427bfcacc50477801b9d2efb283781944a9986127a8be4961f6.png",
+      "small": "https://assets.skool.com/f/16edc7c176a04534b56cf27820fd982c/ac4c1294a0dc4427bfcacc50477801b9d2efb283781944a9986127a8be4961f6-sm.png"
+    },
+    {
+      "id": "eb5e0d28b9884eec8e5e850def9079ae",
+      "url": "https://assets.skool.com/f/16edc7c176a04534b56cf27820fd982c/49d509aaff02494eb5589545b2f610c2e4ae8236ac8744c0b607e930e5da5d45.png",
+      "small": "https://assets.skool.com/f/16edc7c176a04534b56cf27820fd982c/49d509aaff02494eb5589545b2f610c2e4ae8236ac8744c0b607e930e5da5d45-sm.png"
+    },
+    {
+      "id": "097b1511f6c940ae829340a2eb4fb499",
+      "url": "https://assets.skool.com/f/16edc7c176a04534b56cf27820fd982c/d40bee8cb72b49bf8ecda703b28316848b8573d1cdfd4bcd9f61d43bc311dbfe.png",
+      "small": "https://assets.skool.com/f/16edc7c176a04534b56cf27820fd982c/d40bee8cb72b49bf8ecda703b28316848b8573d1cdfd4bcd9f61d43bc311dbfe-sm.png"
+    }
+  ],
+  "survey_questions": [
+    {
+      "question": "What kind of creator are you, author, coach, or content creator,  and what\u2019s your current goal or project?",
+      "type": "text"
+    },
+    {
+      "question": "What\u2019s one thing you\u2019d love to create, publish, or share this year that The Creator\u2019s Hub can help you with?",
+      "type": "text"
+    },
+    {
+      "question": "What\u2019s your best email so we can send you free tools, training, and community updates from The Creator\u2019s Hub?",
+      "type": "email"
+    }
+  ],
+  "ad_strategy": {
+    "hero_summary": "A safe, supportive community for late-bloomers (40+) who want to finally start, and finish, their book using simple AI tools, structure, and encouragement.",
+    "hooks": [
+      "Late bloomers 40+ finish your book with guided AI support.",
+      "5-day Start & Shape Your Book Challenge kicks off soon.",
+      "Simple AI templates remove the tech overwhelm from writing."
+    ],
+    "angles": [
+      {
+        "name": "Late Bloomer Breakthrough",
+        "message": "Show how the community helps 40+ creators ship their book with accountability."
+      },
+      {
+        "name": "Challenge Momentum",
+        "message": "Use countdown-themed ads to drive FOMO into the December challenge."
+      },
+      {
+        "name": "AI Co-Author",
+        "message": "Highlight practical AI walkthroughs tailored for non-technical authors."
+      }
+    ],
+    "targeting": [
+      "Age 40-65 aspiring authors, writing & creativity interests.",
+      "Lookalike audiences from engaged Skool members or email list."
+    ],
+    "calls_to_action": [
+      "Comment below with your book idea (or ideas!)",
+      "Tell us what you hope to achieve before 2026",
+      "Join the weekly training on Tuesdays",
+      "Mark your calendar for the December challenge",
+      "You\u2019re not late.",
+      "You're right on time.",
+      "Let\u2019s write your book together."
+    ]
+  }
+}
