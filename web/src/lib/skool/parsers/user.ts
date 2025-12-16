@@ -1,4 +1,5 @@
 import { User, UserMetadata, toISODate } from "../schema";
+import { firstValue, firstString } from "./utils";
 
 const USER_ID_KEYS = ["id", "userId", "user_id"];
 const USER_NAME_KEYS = ["name", "username"];
@@ -28,30 +29,12 @@ export function normalizeUser(raw: unknown): User | undefined {
 
 function buildMetadata(meta: Record<string, unknown>): UserMetadata {
   return {
-    bio: stringOrEmpty(meta, ["bio", "Bio"]),
-    pictureBubble: stringOrEmpty(meta, ["pictureBubble", "picture_bubble"]),
-    pictureProfile: stringOrEmpty(meta, ["pictureProfile", "picture_profile"]),
-    location: stringOrEmpty(meta, ["location"]),
-    linkWebsite: stringOrEmpty(meta, ["linkWebsite", "website"]),
-    linkYoutube: stringOrEmpty(meta, ["linkYoutube", "youtube"]),
-    actStatus: stringOrEmpty(meta, ["actStatus", "status"]),
+    bio: firstString(meta, ["bio", "Bio"]),
+    pictureBubble: firstString(meta, ["pictureBubble", "picture_bubble"]),
+    pictureProfile: firstString(meta, ["pictureProfile", "picture_profile"]),
+    location: firstString(meta, ["location"]),
+    linkWebsite: firstString(meta, ["linkWebsite", "website"]),
+    linkYoutube: firstString(meta, ["linkYoutube", "youtube"]),
+    actStatus: firstString(meta, ["actStatus", "status"]),
   };
-}
-
-function firstString(source: Record<string, unknown>, keys: string[], fallback = ""): string {
-  const value = firstValue(source, keys);
-  return typeof value === "string" ? value : fallback;
-}
-
-function stringOrEmpty(source: Record<string, unknown>, keys: string[]): string {
-  return firstString(source, keys, "");
-}
-
-function firstValue(source: Record<string, unknown>, keys: string[]): unknown {
-  for (const key of keys) {
-    if (key in source) {
-      return source[key];
-    }
-  }
-  return undefined;
 }

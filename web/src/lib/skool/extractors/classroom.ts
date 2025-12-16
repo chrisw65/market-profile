@@ -1,4 +1,5 @@
 import { SkoolPagePayload } from "../fetcher";
+import { getPageProps } from "./utils";
 
 export type RawModule = Record<string, unknown>;
 
@@ -61,19 +62,4 @@ function isCourseSchema(value: unknown): value is RawModule {
   if (!value || typeof value !== "object") return false;
   const type = (value as Record<string, unknown>)["@type"];
   return typeof type === "string" && COURSE_TYPES.has(type);
-}
-
-function getPageProps(value: unknown): Record<string, unknown> | undefined {
-  if (!value || typeof value !== "object" || !("props" in value)) {
-    return undefined;
-  }
-  const props = (value as { props?: unknown }).props;
-  if (!props || typeof props !== "object" || !("pageProps" in props)) {
-    return undefined;
-  }
-  const pageProps = (props as { pageProps?: unknown }).pageProps;
-  if (pageProps && typeof pageProps === "object") {
-    return pageProps as Record<string, unknown>;
-  }
-  return undefined;
 }

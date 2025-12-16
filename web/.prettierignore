@@ -1,0 +1,21 @@
+# Dependencies
+node_modules
+
+# Build outputs
+.next
+out
+build
+dist
+
+# Env files
+.env
+.env*.local
+
+# Git
+.git
+.gitignore
+
+# Misc
+*.log
+coverage
+.DS_Store
