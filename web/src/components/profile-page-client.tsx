@@ -153,6 +153,21 @@ export function ProfilePageClient({ slug }: ProfilePageClientProps) {
       const response = await fetch(`/api/profiles/${slug}/saved`);
       const data = await response.json();
 
+      // Handle authentication required (401) or not found (404) - both mean no saved data
+      if (response.status === 401 || response.status === 404) {
+        setDataSource(null);
+        setLoading(false);
+        return;
+      }
+
+      // Handle server errors (500) - likely database connection issues
+      if (response.status === 500) {
+        console.warn("Database connection error - you may need to configure .env file");
+        setDataSource(null);
+        setLoading(false);
+        return;
+      }
+
       if (response.ok && data.found) {
         setProfile(data.profile);
         setClassroom(data.classroom || []);
@@ -164,8 +179,9 @@ export function ProfilePageClient({ slug }: ProfilePageClientProps) {
         setDataSource(null);
       }
     } catch (err) {
-      console.error("Error loading saved profile:", err);
-      setError("Unable to load saved profile");
+      console.warn("Could not load saved profile (database may not be configured):", err);
+      // Don't show error to user - just proceed without cached data
+      setDataSource(null);
     } finally {
       setLoading(false);
     }
@@ -176,15 +192,24 @@ export function ProfilePageClient({ slug }: ProfilePageClientProps) {
     setError(null);
 
     try {
-      const response = await fetch(`/api/profiles/${slug}/scrape`, {
+      // Try authenticated scrape first (will auto-save to database)
+      let response = await fetch(`/api/profiles/${slug}/scrape`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ autoSave: true }),
       });
 
+      // If authentication fails, fall back to unauthenticated scrape (no save)
+      if (response.status === 401 || response.status === 500) {
+        console.warn("Database not available, scraping without saving");
+        response = await fetch(`/api/profiles/${slug}`, {
+          method: "GET",
+        });
+      }
+
       const data = await response.json();
 
-      if (response.ok && data.success) {
+      if (response.ok && (data.success || data.profile)) {
         setProfile(data.profile);
         setClassroom(data.classroom || []);
         setPosts(data.posts || []);
@@ -194,6 +219,7 @@ export function ProfilePageClient({ slug }: ProfilePageClientProps) {
       } else {
         setError(data.error || "Failed to scrape profile");
         // Show partial data if available
+        if (data.profile) setProfile(data.profile);
         if (data.classroom) setClassroom(data.classroom);
         if (data.posts) setPosts(data.posts);
       }
@@ -238,7 +264,10 @@ export function ProfilePageClient({ slug }: ProfilePageClientProps) {
 
           <div className="rounded-xl bg-blue-50 border border-blue-200 p-6 space-y-4">
             <p className="text-sm text-blue-900">
-              No saved profile data found. Click the button below to scrape fresh data from Skool.
+              No cached profile data available. Click the button below to scrape fresh data from Skool.
+            </p>
+            <p className="text-xs text-blue-700">
+              💡 Tip: Configure your .env file with Supabase credentials to enable auto-saving and instant cache loading.
             </p>
             <button
               onClick={handleScrape}

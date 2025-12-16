@@ -27,10 +27,25 @@ export async function GET(
 
   try {
     const supabase = await createSupabaseRouteClient();
-    const { data: { session } } = await supabase.auth.getSession();
+
+    // Try to get session, but handle database connection errors
+    let session;
+    try {
+      const { data } = await supabase.auth.getSession();
+      session = data.session;
+    } catch (authError) {
+      logger.warn("Database connection error during auth check", authError);
+      return NextResponse.json({
+        found: false,
+        message: "Database not configured. Please set up your .env file with Supabase credentials."
+      }, { status: 404 });
+    }
 
     if (!session?.user) {
-      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+      return NextResponse.json({
+        found: false,
+        message: "Authentication required to access saved profiles."
+      }, { status: 404 });
     }
 
     logger.info("Loading saved profile", { slug, userId: session.user.id });
@@ -46,7 +61,11 @@ export async function GET(
 
     if (error) {
       logger.error("Database error loading profile", error, { slug });
-      throw error;
+      // Return 404 instead of 500 so client knows to just scrape
+      return NextResponse.json({
+        found: false,
+        message: "Database error. Please check your Supabase configuration."
+      }, { status: 404 });
     }
 
     if (!data) {
@@ -71,9 +90,9 @@ export async function GET(
     });
   } catch (error) {
     logger.error("Failed to load saved profile", error, { slug });
-    return NextResponse.json(
-      { error: "Unable to load saved profile" },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      found: false,
+      message: "Database connection error. You can still scrape profiles without a database."
+    }, { status: 404 });
   }
 }
