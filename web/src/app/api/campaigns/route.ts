@@ -3,58 +3,79 @@ import { createSupabaseRouteClient } from "@/lib/supabase/route";
 import { ensurePersonalOrganization } from "@/lib/supabase/org";
 import { normalizeSlug } from "@/lib/skool/utils";
 
-const handleError = (message: string) =>
-  NextResponse.json({ error: message }, { status: 500 });
+type ApiResponse<T> =
+  | { success: true; data: T; warning?: string }
+  | { success: false; error: string };
+
+const respond = <T>(payload: ApiResponse<T>, status = 200) =>
+  NextResponse.json(payload, { status });
+
+const logSession = (session: { user?: { id?: string; email?: string; role?: string } } | null) => {
+  console.info("[api/campaigns] session", {
+    userId: session?.user?.id ?? null,
+    email: session?.user?.email ?? null,
+    role: session?.user?.role ?? null,
+  });
+};
+
+const authenticate = async (supabase: ReturnType<typeof createSupabaseRouteClient>) => {
+  const {
+    data: { session },
+    error,
+  } = await supabase.auth.getSession();
+  if (error) {
+    console.error("[api/campaigns] session fetch error", error);
+  }
+  logSession(session);
+  if (!session?.user) {
+    throw new Error("Authentication required.");
+  }
+  return session.user;
+};
 
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createSupabaseRouteClient();
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    const user = await authenticate(supabase);
+    const orgId = await ensurePersonalOrganization(user.id, user.email ?? undefined);
+    const slugParam = normalizeSlug(request.nextUrl.searchParams.get("slug"));
 
-    if (!session?.user) {
-      return NextResponse.json({ error: "Authentication required." }, { status: 401 });
-    }
-
-    const orgId = await ensurePersonalOrganization(session.user.id, session.user.email ?? undefined);
-    const slug = normalizeSlug(request.nextUrl.searchParams.get("slug"));
-
-    const { data, error } = await supabase
+    let query = supabase
       .from("saved_campaigns")
       .select("id, title, notes, ideas, slug, created_at")
       .eq("organization_id", orgId)
       .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("[api/campaigns] supabase error", error);
-      return NextResponse.json(
-        { entries: [], warning: "Saved campaigns temporarily unavailable." },
-        { status: 200 }
-      );
+    if (slugParam) {
+      query = query.eq("slug", slugParam);
     }
 
-    const entries = slug ? data?.filter((row) => row.slug === slug) : data;
-    return NextResponse.json({ entries: entries ?? [] });
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("[api/campaigns] GET error", error);
+      return respond({ success: false, error: error.message }, 500);
+    }
+
+    return respond({
+      success: true,
+      data: {
+        entries: data ?? [],
+        slug: slugParam ?? null,
+        userId: user.id,
+      },
+    });
   } catch (error) {
     console.error("[api/campaigns] GET failed", error);
-    return NextResponse.json(
-      { entries: [], warning: "Saved campaigns temporarily unavailable." },
-      { status: 200 }
-    );
+    const msg =
+      error instanceof Error ? error.message : "Unable to fetch saved campaigns.";
+    return respond({ success: false, error: msg }, error instanceof Error && error.message === "Authentication required." ? 401 : 500);
   }
 }
 
 export async function POST(request: Request) {
   try {
     const supabase = await createSupabaseRouteClient();
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (!session?.user) {
-      return NextResponse.json({ error: "Authentication required." }, { status: 401 });
-    }
+    const user = await authenticate(supabase);
 
     const payload = await request.json().catch(() => ({}));
     const slug = normalizeSlug(payload?.slug);
@@ -63,27 +84,64 @@ export async function POST(request: Request) {
     const ideas = payload?.ideas ?? "";
 
     if (!slug) {
-      return NextResponse.json({ error: "Slug is required." }, { status: 400 });
+      return respond({ success: false, error: "Slug is required." }, 400);
     }
 
-    const orgId = await ensurePersonalOrganization(session.user.id, session.user.email ?? undefined);
+    const orgId = await ensurePersonalOrganization(user.id, user.email ?? undefined);
 
-    const { error } = await supabase.from("saved_campaigns").insert({
-      organization_id: orgId,
-      slug,
-      title,
-      notes,
-      ideas,
-    });
+    const { data, error } = await supabase
+      .from("saved_campaigns")
+      .insert({
+        organization_id: orgId,
+        slug,
+        title,
+        notes,
+        ideas,
+      })
+      .select("id, title, notes, ideas, slug, created_at")
+      .single();
 
     if (error) {
       console.error("[api/campaigns] POST insert error", error);
-      return handleError(error.message);
+      return respond({ success: false, error: error.message }, 500);
     }
 
-    return NextResponse.json({ ok: true });
+    return respond({ success: true, data: { campaign: data } });
   } catch (error) {
     console.error("[api/campaigns] POST failed", error);
-    return handleError("Unable to save campaign.");
+    const msg = error instanceof Error ? error.message : "Unable to save campaign.";
+    return respond({ success: false, error: msg }, error instanceof Error && error.message === "Authentication required." ? 401 : 500);
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const supabase = await createSupabaseRouteClient();
+    const user = await authenticate(supabase);
+    const payload = await request.json().catch(() => ({}));
+    const id = payload?.id;
+
+    if (!id) {
+      return respond({ success: false, error: "Campaign id is required." }, 400);
+    }
+
+    const orgId = await ensurePersonalOrganization(user.id, user.email ?? undefined);
+
+    const { error } = await supabase
+      .from("saved_campaigns")
+      .delete()
+      .eq("id", id)
+      .eq("organization_id", orgId);
+
+    if (error) {
+      console.error("[api/campaigns] DELETE error", error);
+      return respond({ success: false, error: error.message }, 500);
+    }
+
+    return respond({ success: true, data: { id } });
+  } catch (error) {
+    console.error("[api/campaigns] DELETE failed", error);
+    const msg = error instanceof Error ? error.message : "Unable to delete campaign.";
+    return respond({ success: false, error: msg }, error instanceof Error && error.message === "Authentication required." ? 401 : 500);
   }
 }

@@ -64,12 +64,12 @@ export default async function AdminDashboard() {
             >
               Browse profiles
             </Link>
-            <a
+            <Link
               href="/"
               className="rounded-full border border-transparent bg-pink-500 px-4 py-2 font-semibold text-white shadow-sm hover:bg-pink-400"
             >
               Request new profile
-            </a>
+            </Link>
           </div>
         </section>
 

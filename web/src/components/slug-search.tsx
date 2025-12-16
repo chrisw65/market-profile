@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type SavedCommunity = {
   id: string;
@@ -11,25 +11,58 @@ type SavedCommunity = {
 
 const STORAGE_KEY = "skool:saved-communities";
 
+function readSavedCommunities(): SavedCommunity[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function slugFromInput(value: string): string | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (trimmed.startsWith("http")) {
+    try {
+      const url = new URL(trimmed);
+      return url.pathname.replace(/^\/+/, "").replace(/\/+$/, "") || null;
+    } catch {
+      // fall through
+    }
+  }
+  return trimmed.replace(/^\/+/, "").replace(/\/+$/, "") || null;
+}
+
 export function SlugSearchForm() {
   const router = useRouter();
   const [slug, setSlug] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [savedCommunities, setSavedCommunities] = useState<SavedCommunity[]>(() => {
-    if (typeof window === "undefined") return [];
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (!raw) return [];
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  });
+  const [savedCommunities, setSavedCommunities] = useState<SavedCommunity[]>([]);
   const [selectedSaved, setSelectedSaved] = useState<string>("");
+  const [hydrated, setHydrated] = useState(false);
   const [newName, setNewName] = useState("");
   const [newUrl, setNewUrl] = useState("");
   const [showSaveForm, setShowSaveForm] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const entries = readSavedCommunities();
+    if (entries.length) {
+      setSavedCommunities(entries);
+      setSelectedSaved(entries[0].id);
+      setSlug(entries[0].slug);
+    }
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !hydrated) return;
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(savedCommunities));
+  }, [savedCommunities, hydrated]);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -63,9 +96,7 @@ export function SlugSearchForm() {
       name: newName.trim(),
       slug: cleaned,
     };
-    const next = [...savedCommunities, entry];
-    setSavedCommunities(next);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    setSavedCommunities((prev) => [...prev, entry]);
     setNewName("");
     setNewUrl("");
     setSelectedSaved(entry.id);
@@ -84,14 +115,16 @@ export function SlugSearchForm() {
           id="community-select"
           value={selectedSaved}
           onChange={handleSelect}
-          className="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-base text-zinc-900 shadow-sm focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-200"
+          disabled={!hydrated}
+          className="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-base text-zinc-900 shadow-sm focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-200 disabled:cursor-not-allowed"
         >
-          <option value="">None</option>
-          {savedCommunities.map((community) => (
-            <option key={community.id} value={community.id}>
-              {community.name}
-            </option>
-          ))}
+          <option value="">{hydrated ? "None" : "Loading saved communities..."}</option>
+          {hydrated &&
+            savedCommunities.map((community) => (
+              <option key={community.id} value={community.id}>
+                {community.name}
+              </option>
+            ))}
         </select>
 
         <label htmlFor="slug-input" className="text-sm font-medium text-zinc-700">
@@ -161,19 +194,4 @@ export function SlugSearchForm() {
       </div>
     </div>
   );
-}
-
-function slugFromInput(value: string): string | null {
-  const trimmed = value.trim();
-  if (!trimmed) return null;
-  if (trimmed.startsWith("http")) {
-    try {
-      const url = new URL(trimmed);
-      return url.pathname.replace(/^\/+/, "").replace(/\/+$/, "") || null;
-    } catch {
-      // fall through to slug handling
-    }
-  }
-  // Assume slug format
-  return trimmed.replace(/^\/+/, "").replace(/\/+$/, "") || null;
 }

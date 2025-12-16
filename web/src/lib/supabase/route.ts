@@ -13,6 +13,10 @@ export async function createSupabaseRouteClient() {
   const storage = await cookies();
 
   return createServerClient(url, anonKey, {
-    cookies: buildCookieStore(storage),
+    cookies: buildCookieStore(storage, { readOnly: true }),
+    auth: {
+      persistSession: false,
+      detectSessionInUrl: false,
+    },
   });
 }

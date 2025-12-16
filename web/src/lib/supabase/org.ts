@@ -1,4 +1,3 @@
-import { createSupabaseServerClient } from "./server";
 import { createSupabaseServiceClient } from "./service";
 
 export async function ensurePersonalOrganization(userId: string, email?: string) {
@@ -38,17 +37,4 @@ export async function ensurePersonalOrganization(userId: string, email?: string)
   }
 
   return org.id;
-}
-
-export async function listSavedCommunities() {
-  const supabase = await createSupabaseServerClient();
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session?.user) return [];
-
-  const { data } = await supabase
-    .from("community_profiles")
-    .select("id, slug, inserted_at:created_at")
-    .order("created_at", { ascending: false })
-    .limit(20);
-  return data ?? [];
 }

@@ -1,8 +1,23 @@
 import Link from "next/link";
-import { listSavedCommunities } from "@/lib/supabase/org";
+
+const getOrigin = () =>
+  process.env.NEXT_PUBLIC_APP_ORIGIN ??
+  process.env.NEXTAUTH_URL ??
+  process.env.NEXT_PUBLIC_URL ??
+  "http://localhost:3000";
+
+type SavedCommunityEntry = {
+  id: string;
+  slug: string;
+  created_at?: string;
+};
 
 export async function SavedCommunities() {
-  const entries = await listSavedCommunities();
+  const response = await fetch(`${getOrigin()}/api/communities`, {
+    cache: "no-store",
+  });
+  const payload = await response.json().catch(() => ({ data: [] }));
+  const entries: SavedCommunityEntry[] = payload.data ?? [];
   if (!entries.length) return null;
 
   return (
@@ -16,7 +31,10 @@ export async function SavedCommunities() {
             <div>
               <p className="font-medium text-zinc-900">{entry.slug}</p>
               <p className="text-xs text-zinc-500">
-                Saved {entry.inserted_at ? new Date(entry.inserted_at).toLocaleDateString() : ""}
+                Saved{" "}
+                {entry.created_at
+                  ? new Date(entry.created_at).toLocaleDateString()
+                  : ""}
               </p>
             </div>
             <Link

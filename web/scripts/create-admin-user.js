@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-const fs = require("fs");
-const path = require("path");
-const { createClient } = require("@supabase/supabase-js");
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { createClient } from "@supabase/supabase-js";
 
 function loadEnv(filePath) {
   const env = {};
@@ -24,19 +25,22 @@ function loadEnv(filePath) {
   return env;
 }
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const envPath = path.resolve(__dirname, "..", ".env");
 const env = loadEnv(envPath);
 Object.assign(process.env, env);
 
 try {
-  const undici = require("undici");
+  const undiciModule = await import("undici");
+  const undici = undiciModule.default ?? undiciModule;
   if (!globalThis.fetch) {
     globalThis.fetch = undici.fetch;
     globalThis.Headers = undici.Headers;
     globalThis.Request = undici.Request;
     globalThis.Response = undici.Response;
   }
-} catch (err) {
+} catch {
   // ignore if undici is unavailable
 }
 

@@ -12,6 +12,7 @@ export async function createSupabaseServerClient() {
   }
 
   return createServerClient(url, anonKey, {
-    cookies: buildCookieStore(cookieStore),
+    cookies: buildCookieStore(cookieStore, { readOnly: true }),
+    persistSession: false,
   });
 }
