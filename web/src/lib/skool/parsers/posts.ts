@@ -1,6 +1,7 @@
 import { ItemType, SkoolItem, toISODate } from "../schema";
 import { normalizeUser } from "./user";
 import { normalizeComments } from "./comments";
+import { firstValue, numberOrZero } from "./utils";
 
 type RawPost = Record<string, unknown>;
 
@@ -60,20 +61,4 @@ function stringField(
   if (!source) return fallback;
   const value = firstValue(source, keys);
   return typeof value === "string" ? value : fallback;
-}
-
-function numberOrZero(source: Record<string, unknown>, keys: string[]): number {
-  const value = firstValue(source, keys);
-  if (typeof value === "number") return value;
-  const parsed = typeof value === "string" ? Number(value) : Number.NaN;
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
-function firstValue(source: Record<string, unknown>, keys: string[]): unknown {
-  for (const key of keys) {
-    if (key in source) {
-      return source[key];
-    }
-  }
-  return undefined;
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseRouteClient } from "@/lib/supabase/route";
 import { ensurePersonalOrganization } from "@/lib/supabase/org";
 import { normalizeSlug } from "@/lib/skool/utils";
+import { validateRequest, campaignSchema, campaignDeleteSchema } from "@/lib/validation/schemas";
 
 type ApiResponse<T> =
   | { success: true; data: T; warning?: string }
@@ -77,14 +78,17 @@ export async function POST(request: Request) {
     const supabase = await createSupabaseRouteClient();
     const user = await authenticate(supabase);
 
-    const payload = await request.json().catch(() => ({}));
-    const slug = normalizeSlug(payload?.slug);
-    const title = payload?.title ?? `Campaign ${new Date().toLocaleString()}`;
-    const notes = payload?.notes ?? "";
-    const ideas = payload?.ideas ?? "";
+    // Validate request body
+    const validation = await validateRequest(request, campaignSchema);
+    if (!validation.success) {
+      return respond({ success: false, error: validation.error }, 400);
+    }
 
-    if (!slug) {
-      return respond({ success: false, error: "Slug is required." }, 400);
+    const { slug, title, notes, ideas } = validation.data;
+    const normalizedSlug = normalizeSlug(slug);
+
+    if (!normalizedSlug) {
+      return respond({ success: false, error: "Invalid slug format." }, 400);
     }
 
     const orgId = await ensurePersonalOrganization(user.id, user.email ?? undefined);
@@ -93,10 +97,10 @@ export async function POST(request: Request) {
       .from("saved_campaigns")
       .insert({
         organization_id: orgId,
-        slug,
-        title,
-        notes,
-        ideas,
+        slug: normalizedSlug,
+        title: title ?? `Campaign ${new Date().toLocaleString()}`,
+        notes: notes ?? "",
+        ideas: ideas ?? "",
       })
       .select("id, title, notes, ideas, slug, created_at")
       .single();
@@ -118,13 +122,14 @@ export async function DELETE(request: Request) {
   try {
     const supabase = await createSupabaseRouteClient();
     const user = await authenticate(supabase);
-    const payload = await request.json().catch(() => ({}));
-    const id = payload?.id;
 
-    if (!id) {
-      return respond({ success: false, error: "Campaign id is required." }, 400);
+    // Validate request body
+    const validation = await validateRequest(request, campaignDeleteSchema);
+    if (!validation.success) {
+      return respond({ success: false, error: validation.error }, 400);
     }
 
+    const { id } = validation.data;
     const orgId = await ensurePersonalOrganization(user.id, user.email ?? undefined);
 
     const { error } = await supabase

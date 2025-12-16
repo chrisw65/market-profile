@@ -1,4 +1,5 @@
 import { SkoolPagePayload } from "../fetcher";
+import { getPageProps } from "./utils";
 
 export type RawPost = Record<string, unknown>;
 
@@ -53,19 +54,4 @@ function isWithItems(value: unknown): value is WithItems {
     "items" in value &&
     Array.isArray((value as { items?: unknown }).items)
   );
-}
-
-function getPageProps(value: unknown): Record<string, unknown> | undefined {
-  if (!value || typeof value !== "object" || !("props" in value)) {
-    return undefined;
-  }
-  const props = (value as { props?: unknown }).props;
-  if (!props || typeof props !== "object" || !("pageProps" in props)) {
-    return undefined;
-  }
-  const pageProps = (props as { pageProps?: unknown }).pageProps;
-  if (pageProps && typeof pageProps === "object") {
-    return pageProps as Record<string, unknown>;
-  }
-  return undefined;
 }

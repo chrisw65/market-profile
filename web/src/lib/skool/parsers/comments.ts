@@ -1,5 +1,6 @@
 import { Comment, CommentMetadata, toISODate } from "../schema";
 import { normalizeUser } from "./user";
+import { firstValue, firstString, numberOrZero } from "./utils";
 
 type RawComment = Record<string, unknown>;
 
@@ -75,34 +76,9 @@ function buildCommentMetadata(node: Record<string, unknown>): CommentMetadata {
   return {
     action: numberOrZero(meta, ["action"]),
     upvotes: numberOrZero(meta, ["upvotes"]),
-    attachments: stringOrEmpty(meta, ["attachments"]),
-    attachments_data: stringOrEmpty(meta, ["attachments_data"]),
+    attachments: firstString(meta, ["attachments"]),
+    attachments_data: firstString(meta, ["attachments_data"]),
   };
-}
-
-function numberOrZero(source: Record<string, unknown>, keys: string[]): number {
-  const value = firstValue(source, keys);
-  const parsed = typeof value === "number" ? value : Number(value);
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
-function stringOrEmpty(source: Record<string, unknown>, keys: string[]): string {
-  const value = firstValue(source, keys);
-  return typeof value === "string" ? value : "";
-}
-
-function firstString(source: Record<string, unknown>, keys: string[]): string {
-  const value = firstValue(source, keys);
-  return typeof value === "string" ? value : "";
-}
-
-function firstValue(source: Record<string, unknown>, keys: string[]): unknown {
-  for (const key of keys) {
-    if (key in source) {
-      return source[key];
-    }
-  }
-  return undefined;
 }
 
 type ItemsWrapper = { items: unknown[] };
