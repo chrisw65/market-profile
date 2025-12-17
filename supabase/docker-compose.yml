@@ -78,5 +78,24 @@ services:
     ports:
       - "54321:8000"
 
+  studio:
+    image: supabase/studio:20241118-ce42139
+    restart: unless-stopped
+    depends_on:
+      - gateway
+    env_file:
+      - .env.docker
+    environment:
+      STUDIO_PG_META_URL: http://gateway:8000/pg
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DEFAULT_ORGANIZATION_NAME: Default Organization
+      DEFAULT_PROJECT_NAME: Default Project
+      SUPABASE_URL: http://gateway:8000
+      SUPABASE_PUBLIC_URL: http://localhost:54321
+      SUPABASE_ANON_KEY: ${ANON_KEY}
+      SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_SECRET}
+    ports:
+      - "54325:3000"
+
 volumes:
   supabase-db-data:
