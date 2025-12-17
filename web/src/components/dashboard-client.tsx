@@ -45,12 +45,15 @@ export function DashboardClient() {
     try {
       const response = await fetch("/api/communities", { cache: "no-store" });
       if (!response.ok) {
-        throw new Error("Failed to fetch profiles");
+        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+        throw new Error(errorData.error || `Server error: ${response.status}`);
       }
       const data = await response.json();
       setProfiles(data.profiles || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load profiles");
+      const errorMessage = err instanceof Error ? err.message : "Failed to load profiles";
+      console.error("[dashboard] fetchProfiles error:", errorMessage);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
