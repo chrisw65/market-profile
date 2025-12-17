@@ -79,7 +79,7 @@ services:
       - "54321:8000"
 
   studio:
-    image: supabase/studio:20241118-ce42139
+    image: supabase/studio:latest
     restart: unless-stopped
     depends_on:
       - gateway
