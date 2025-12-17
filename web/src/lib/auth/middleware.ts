@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server'
-import { createRouteClient } from '@/lib/supabase/route'
-import type { User } from '@supabase/supabase-js'
+import { createSupabaseRouteClient } from '@/lib/supabase/route'
+import type { User, SupabaseClient } from '@supabase/supabase-js'
 
 export interface AuthResult {
   user: User
-  supabase: ReturnType<typeof createRouteClient>
+  supabase: SupabaseClient
 }
 
 /**
@@ -12,7 +12,7 @@ export interface AuthResult {
  * Returns user and supabase client if authenticated, or 401 error response
  */
 export async function requireAuth(request: Request): Promise<AuthResult | NextResponse> {
-  const supabase = createRouteClient()
+  const supabase = await createSupabaseRouteClient()
 
   const { data: { user }, error } = await supabase.auth.getUser()
 
