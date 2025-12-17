@@ -14,7 +14,7 @@ export async function GET() {
   }
 
   if (!session?.user) {
-    return NextResponse.json({ data: [] });
+    return NextResponse.json({ profiles: [], total: 0 });
   }
 
   const { data, error } = await supabase
