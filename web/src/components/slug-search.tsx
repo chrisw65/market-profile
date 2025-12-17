@@ -51,12 +51,15 @@ export function SlugSearchForm() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const entries = readSavedCommunities();
-    if (entries.length) {
-      setSavedCommunities(entries);
-      setSelectedSaved(entries[0].id);
-      setSlug(entries[0].slug);
-    }
-    setHydrated(true);
+    const timer = window.setTimeout(() => {
+      if (entries.length) {
+        setSavedCommunities(entries);
+        setSelectedSaved(entries[0].id);
+        setSlug(entries[0].slug);
+      }
+      setHydrated(true);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   useEffect(() => {

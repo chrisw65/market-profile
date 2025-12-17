@@ -11,11 +11,11 @@
    ```
    This spins up Postgres, GoTrue (auth), PostgREST, and Realtime locally.
 3. Apply the schema:
-   - To reset everything you can still use `supabase db reset` if you have the CLI installed, otherwise run every SQL file in `supabase/migrations` inside the container:
-     ```
-     docker compose -f supabase/docker-compose.yml --env-file supabase/.env.docker exec db \
-       bash -c 'for file in /supabase/migrations/*.sql; do psql -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-postgres} -f "$file"; done'
-     ```
+   ```
+   ./scripts/apply-supabase-migrations.sh
+   ```
+   - The script checks that the local Docker stack is running, runs every SQL file in `supabase/migrations`, and re-validates the schema using `psql -v ON_ERROR_STOP=1`.
+   - If you prefer the Supabase CLI you can still run `supabase db reset`, but the helper script removes that dependency for local development.
 4. Set the Next.js env vars (in `web/.env`) pointing to the local stack:
    ```
    NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321

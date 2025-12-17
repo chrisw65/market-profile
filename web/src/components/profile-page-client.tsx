@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { CommunityProfile } from "@/lib/skool/profile";
 import { SkoolItem } from "@/lib/skool/schema";
 import { ProfileActions } from "@/components/profile-actions";
@@ -141,11 +141,7 @@ export function ProfilePageClient({ slug }: ProfilePageClientProps) {
   const [dataSource, setDataSource] = useState<"cached" | "fresh" | null>(null);
 
   // Load saved data on mount
-  useEffect(() => {
-    loadSavedProfile();
-  }, [slug]);
-
-  const loadSavedProfile = async () => {
+  const loadSavedProfile = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -169,7 +165,11 @@ export function ProfilePageClient({ slug }: ProfilePageClientProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [slug]);
+
+  useEffect(() => {
+    loadSavedProfile();
+  }, [loadSavedProfile]);
 
   const handleScrape = async () => {
     setScraping(true);
@@ -270,8 +270,8 @@ export function ProfilePageClient({ slug }: ProfilePageClientProps) {
                 Scraping data from Skool...
               </p>
             </div>
-            <p className="text-xs text-yellow-800">
-              This typically takes 30-60 seconds. We're fetching the community profile, classroom modules, and recent posts.
+              <p className="text-xs text-yellow-800">
+              This typically takes 30-60 seconds. We&apos;re fetching the community profile, classroom modules, and recent posts.
             </p>
           </div>
         </div>

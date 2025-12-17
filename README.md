@@ -76,9 +76,14 @@ npm install
 
 ### 5. Run database migrations
 
+From the repo root (one level above `web/`), pick the option that matches your setup:
+
 ```bash
-# If using local Supabase
-cd ../supabase
+# Local Supabase Docker stack
+./scripts/apply-supabase-migrations.sh
+
+# If you're using the Supabase CLI with a linked project
+cd supabase
 npx supabase db push
 
 # If using Supabase Cloud
@@ -93,6 +98,8 @@ npm run dev
 ```
 
 Visit [http://localhost:3000](http://localhost:3000)
+
+> Profile detail pages require an authenticated Supabase session. Sign in via the top bar (magic link or password) before navigating directly to `/profiles/[slug]` or you will be redirected back to the homepage.
 
 ## Project Structure
 

@@ -17,7 +17,7 @@ export function ProfileActions({ slug }: { slug: string }) {
   const [generating, setGenerating] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
 
-  const { user, loading: authLoading, authenticated, userId } = useAuth();
+  const { loading: authLoading, authenticated, userId } = useAuth();
 
   const {
     campaigns,
