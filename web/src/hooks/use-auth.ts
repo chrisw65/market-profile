@@ -11,6 +11,8 @@ import type { User } from "@supabase/supabase-js";
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [role, setRole] = useState<'admin' | 'user' | 'guest'>('guest');
 
   const fetchSession = useCallback(async () => {
     setLoading(true);
@@ -18,9 +20,13 @@ export function useAuth() {
       const response = await fetch("/api/auth/session", { cache: "no-store" });
       const payload = await response.json().catch(() => ({}));
       setUser(payload.user ?? null);
+      setIsAdmin(payload.isAdmin ?? false);
+      setRole(payload.role ?? 'guest');
     } catch (err) {
       console.error("[useAuth] session fetch failed", err);
       setUser(null);
+      setIsAdmin(false);
+      setRole('guest');
     } finally {
       setLoading(false);
     }
@@ -46,5 +52,7 @@ export function useAuth() {
     loading,
     authenticated: Boolean(user),
     userId: user?.id ?? null,
+    isAdmin,
+    role,
   };
 }

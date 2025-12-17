@@ -1,19 +1,15 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { isAdmin } from "@/lib/auth/middleware";
+import { DashboardClient } from "@/components/dashboard-client";
 
-export default async function AdminDashboard() {
+export default async function DashboardPage() {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Redirect based on authentication status and role
+  // Require authentication
   if (!user) {
     redirect("/login");
   }
 
-  if (isAdmin(user)) {
-    redirect("/admin/users");
-  } else {
-    redirect("/dashboard");
-  }
+  return <DashboardClient />;
 }

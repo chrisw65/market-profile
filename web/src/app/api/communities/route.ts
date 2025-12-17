@@ -19,8 +19,8 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from("community_profiles")
-    .select("id, slug, created_at")
-    .order("created_at", { ascending: false })
+    .select("id, slug, profile, created_at, updated_at")
+    .order("updated_at", { ascending: false })
     .limit(20);
 
   if (error) {
@@ -28,5 +28,5 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ data: data ?? [] });
+  return NextResponse.json({ profiles: data ?? [], total: data?.length ?? 0 });
 }
